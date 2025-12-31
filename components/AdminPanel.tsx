@@ -1,12 +1,156 @@
 import React, { useState } from 'react';
 import { PRESETS } from '../constants';
-import { LayoutTemplate, Type, Image as ImageIcon, QrCode, Code, Save, Store, Mic2, Award } from 'lucide-react';
+import { Type, Image as ImageIcon, QrCode, Code, Save, Store, Mic2, Award } from 'lucide-react';
 
 interface AdminPanelProps {
   currentHtml: string;
   onUpdateHtml: (html: string) => void;
   onSave: () => void;
 }
+
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    height: '100%',
+  },
+  section: {
+    marginBottom: '24px',
+    paddingBottom: '24px',
+    borderBottom: '1px solid #f1f5f9',
+  },
+  label: {
+    fontSize: '12px',
+    fontWeight: '700',
+    color: '#94a3b8',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.05em',
+    marginBottom: '12px',
+    display: 'block',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '8px',
+  },
+  presetBtn: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px',
+    backgroundColor: '#f8fafc',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    color: '#64748b',
+  },
+  presetIcon: {
+    width: '20px',
+    height: '20px',
+  },
+  presetText: {
+    fontSize: '10px',
+    fontWeight: '600',
+  },
+  row: {
+    display: 'flex',
+    gap: '8px',
+    marginBottom: '12px',
+  },
+  inputWrapper: {
+    position: 'relative' as const,
+    flex: 1,
+  },
+  input: {
+    width: '100%',
+    padding: '8px 12px',
+    fontSize: '12px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '6px',
+    outline: 'none',
+    transition: 'border-color 0.2s',
+  },
+  actionBtn: {
+    padding: '8px 12px',
+    backgroundColor: '#f1f5f9',
+    color: '#475569',
+    borderRadius: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '12px',
+    fontWeight: '500',
+    cursor: 'pointer',
+  },
+  dashedBtn: {
+    width: '100%',
+    padding: '8px',
+    backgroundColor: '#f1f5f9',
+    color: '#475569',
+    borderRadius: '6px',
+    border: '1px dashed #cbd5e1',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontSize: '12px',
+    fontWeight: '500',
+    cursor: 'pointer',
+  },
+  editorSection: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    minHeight: 0,
+  },
+  editorLabel: {
+    fontSize: '12px',
+    fontWeight: '700',
+    color: '#94a3b8',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.05em',
+    marginBottom: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  textarea: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#0f172a',
+    color: '#cbd5e1',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '11px',
+    lineHeight: '1.6',
+    padding: '16px',
+    borderRadius: '8px',
+    resize: 'none' as const,
+    outline: 'none',
+    border: '1px solid #1e293b',
+  },
+  saveBtnContainer: {
+    marginTop: '16px',
+    paddingTop: '16px',
+    borderTop: '1px solid #f1f5f9',
+  },
+  saveBtn: {
+    width: '100%',
+    padding: '12px',
+    backgroundColor: '#059669',
+    color: 'white',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontSize: '14px',
+    fontWeight: '700',
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)',
+    transition: 'background-color 0.2s',
+  }
+};
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ currentHtml, onUpdateHtml, onSave }) => {
   const [varInput, setVarInput] = useState('');
@@ -19,13 +163,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentHtml, onUpdateHtml, onSa
   };
 
   const insertAtCursor = (text: string) => {
-    // Simple append for now as textarea cursor insertion is complex in React 
-    // without a ref to the textarea and selection manipulation.
-    // For this level of complexity, appending to the end or replacing selection 
-    // if using a proper code editor component is standard. 
-    // We'll use a simple append to the HTML for this demo, or try to insert sensibly.
-    
-    // A better UX for a "Sophisticated" app is modifying the textarea value directly:
     const textarea = document.getElementById('code-editor') as HTMLTextAreaElement;
     if (textarea) {
         const start = textarea.selectionStart;
@@ -33,8 +170,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentHtml, onUpdateHtml, onSa
         const value = textarea.value;
         const newValue = value.substring(0, start) + text + value.substring(end);
         onUpdateHtml(newValue);
-        
-        // Restore focus next tick
         setTimeout(() => {
             textarea.focus();
             textarea.selectionStart = textarea.selectionEnd = start + text.length;
@@ -57,91 +192,102 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ currentHtml, onUpdateHtml, onSa
     setImgInput('');
   };
 
-  const addQRPlaceholder = () => {
-    insertAtCursor(`{{QR_CODE}}`);
-  };
-
   return (
-    <div className="flex flex-col h-full">
+    <div style={styles.container}>
       
       {/* 1. Templates */}
-      <div className="mb-6 pb-6 border-b border-slate-100">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">1. Select Template</span>
-        <div className="grid grid-cols-3 gap-2">
-          <button onClick={() => loadPreset('promo')} className="flex flex-col items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all group">
-            <Store className="w-5 h-5 text-slate-500 group-hover:text-indigo-600" />
-            <span className="text-[10px] font-semibold">Promo</span>
-          </button>
-          <button onClick={() => loadPreset('event')} className="flex flex-col items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all group">
-            <Mic2 className="w-5 h-5 text-slate-500 group-hover:text-indigo-600" />
-            <span className="text-[10px] font-semibold">Event</span>
-          </button>
-          <button onClick={() => loadPreset('cert')} className="flex flex-col items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all group">
-            <Award className="w-5 h-5 text-slate-500 group-hover:text-indigo-600" />
-            <span className="text-[10px] font-semibold">Cert</span>
-          </button>
+      <div style={styles.section}>
+        <span style={styles.label}>1. Select Template</span>
+        <div style={styles.grid}>
+          {['promo', 'event', 'cert'].map(type => (
+              <button 
+                key={type} 
+                onClick={() => loadPreset(type)} 
+                style={styles.presetBtn}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#6366f1';
+                    e.currentTarget.style.backgroundColor = '#eef2ff';
+                    e.currentTarget.style.color = '#4f46e5';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.backgroundColor = '#f8fafc';
+                    e.currentTarget.style.color = '#64748b';
+                }}
+              >
+                {type === 'promo' && <Store style={styles.presetIcon} />}
+                {type === 'event' && <Mic2 style={styles.presetIcon} />}
+                {type === 'cert' && <Award style={styles.presetIcon} />}
+                <span style={styles.presetText}>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+              </button>
+          ))}
         </div>
       </div>
 
       {/* 2. Tools */}
-      <div className="mb-6 pb-6 border-b border-slate-100 space-y-3">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">2. Dynamic Tools</span>
+      <div style={styles.section}>
+        <span style={styles.label}>2. Dynamic Tools</span>
         
         {/* Variable */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
+        <div style={styles.row}>
+          <div style={styles.inputWrapper}>
              <input 
                 type="text" 
                 value={varInput}
                 onChange={(e) => setVarInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addVariable()}
                 placeholder="Label (e.g. PRICE)" 
-                className="w-full pl-3 pr-3 py-2 text-xs border border-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                style={styles.input}
              />
           </div>
-          <button onClick={addVariable} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md flex items-center gap-1 text-xs font-medium transition-colors">
-            <Type className="w-3 h-3" /> Add
+          <button onClick={addVariable} style={styles.actionBtn}>
+            <Type size={12} /> Add
           </button>
         </div>
 
         {/* Image */}
-        <div className="flex gap-2">
+        <div style={styles.row}>
            <input 
               type="text" 
               value={imgInput}
               onChange={(e) => setImgInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addImage()}
               placeholder="Image URL (https://...)" 
-              className="flex-1 pl-3 pr-3 py-2 text-xs border border-slate-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              style={{...styles.input, flex: 1}}
            />
-          <button onClick={addImage} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md flex items-center gap-1 text-xs font-medium transition-colors">
-            <ImageIcon className="w-3 h-3" /> Img
+          <button onClick={addImage} style={styles.actionBtn}>
+            <ImageIcon size={12} /> Img
           </button>
         </div>
 
         {/* QR Placeholder */}
-        <button onClick={addQRPlaceholder} className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-md flex items-center justify-center gap-2 text-xs font-medium transition-colors border border-dashed border-slate-300">
-          <QrCode className="w-3 h-3" /> Insert QR Placeholder
+        <button onClick={() => insertAtCursor(`{{QR_CODE}}`)} style={styles.dashedBtn}>
+          <QrCode size={12} /> Insert QR Placeholder
         </button>
       </div>
 
       {/* 3. Editor */}
-      <div className="flex-1 flex flex-col min-h-0">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <Code className="w-3 h-3" /> Source Code
+      <div style={styles.editorSection}>
+        <span style={styles.editorLabel}>
+            <Code size={12} /> Source Code
         </span>
         <textarea
             id="code-editor"
             value={currentHtml}
             onChange={(e) => onUpdateHtml(e.target.value)}
-            className="flex-1 w-full bg-slate-900 text-slate-300 font-mono text-[11px] leading-relaxed p-4 rounded-lg resize-none outline-none focus:ring-2 focus:ring-indigo-500 border border-slate-800"
+            style={styles.textarea}
             placeholder="<html>..."
         ></textarea>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-slate-100">
-        <button onClick={onSave} className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center gap-2 text-sm font-bold shadow-lg shadow-emerald-200 transition-all">
-            <Save className="w-4 h-4" /> Save Template
+      <div style={styles.saveBtnContainer}>
+        <button 
+            onClick={onSave} 
+            style={styles.saveBtn}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#047857'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#059669'}
+        >
+            <Save size={16} /> Save Template
         </button>
       </div>
     </div>

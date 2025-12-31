@@ -26,10 +26,6 @@ const FlyerCanvas = forwardRef<FlyerCanvasRef, FlyerCanvasProps>(({ html, themeC
       processed = processed.replace(regex, value);
     });
 
-    // Handle variables that haven't been filled yet (show placeholder or empty)
-    // We intentionally leave them as {{VAR}} if not found, or replace with empty string if desired.
-    // Here we just let them be, or the user can see them to know what to fill.
-    
     return processed;
   };
 
@@ -74,7 +70,7 @@ const FlyerCanvas = forwardRef<FlyerCanvasRef, FlyerCanvasProps>(({ html, themeC
                 <meta charset="UTF-8">
                 <title>${fileName}</title>
             </head>
-            <body style="display:flex;justify-content:center;background:#f1f5f9;padding:50px;">
+            <body style="display:flex;justify-content:center;background:#f1f5f9;padding:50px;margin:0;font-family:sans-serif;">
                 <style>:root{--theme-color: ${themeColor};}</style>
                 <div style="background:white;box-shadow:0 10px 25px rgba(0,0,0,0.1);">${content}</div>
             </body>
@@ -100,9 +96,12 @@ const FlyerCanvas = forwardRef<FlyerCanvasRef, FlyerCanvasProps>(({ html, themeC
   return (
     <div 
       ref={containerRef}
-      className="origin-top shadow-2xl transition-all duration-300 ease-out"
       style={{
         transform: `scale(${scale})`,
+        transformOrigin: 'top center',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        transition: 'all 0.3s ease-out',
+        display: 'inline-block' // Ensure it wraps content tightly
       }}
       dangerouslySetInnerHTML={{ __html: getProcessedHtml() }}
     />

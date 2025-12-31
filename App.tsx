@@ -6,6 +6,163 @@ import UserPanel from './components/UserPanel';
 import FlyerCanvas, { FlyerCanvasRef } from './components/FlyerCanvas';
 import { Layers, User, Zap } from 'lucide-react';
 
+const styles = {
+  appContainer: {
+    display: 'flex',
+    height: '100vh',
+    width: '100%',
+    backgroundColor: '#f8fafc',
+    overflow: 'hidden',
+    color: '#1e293b',
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+  },
+  sidebar: {
+    width: '380px',
+    backgroundColor: 'white',
+    borderRight: '1px solid #e2e8f0',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    boxShadow: '4px 0 24px rgba(0,0,0,0.03)',
+    zIndex: 20,
+    flexShrink: 0,
+  },
+  header: {
+    height: '64px',
+    borderBottom: '1px solid #f1f5f9',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '0 24px',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    backdropFilter: 'blur(8px)',
+    position: 'sticky' as const,
+    top: 0,
+    zIndex: 10,
+  },
+  logoBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  logoIcon: {
+    width: '32px',
+    height: '32px',
+    backgroundColor: '#4f46e5',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+  },
+  logoTextContainer: {
+    lineHeight: 1.2,
+  },
+  logoTitle: {
+    fontSize: '14px',
+    fontWeight: '800',
+    color: '#0f172a',
+    margin: 0,
+  },
+  logoSubtitle: {
+    fontSize: '10px',
+    fontWeight: '600',
+    color: '#94a3b8',
+    letterSpacing: '0.05em',
+    margin: 0,
+  },
+  badge: (active: boolean) => ({
+    padding: '4px 10px',
+    borderRadius: '999px',
+    fontSize: '10px',
+    fontWeight: '700',
+    letterSpacing: '0.05em',
+    backgroundColor: active ? '#ecfdf5' : '#eff6ff',
+    color: active ? '#047857' : '#1d4ed8',
+  }),
+  switcherContainer: {
+    padding: '16px',
+  },
+  switcherBg: {
+    backgroundColor: '#f1f5f9',
+    padding: '4px',
+    borderRadius: '8px',
+    display: 'flex',
+    position: 'relative' as const,
+  },
+  switcherHighlight: (isUser: boolean) => ({
+    position: 'absolute' as const,
+    top: '4px',
+    bottom: '4px',
+    left: '4px',
+    width: 'calc(50% - 4px)',
+    backgroundColor: 'white',
+    borderRadius: '6px',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+    transition: 'transform 0.3s ease',
+    transform: isUser ? 'translateX(100%)' : 'translateX(0)',
+  }),
+  switcherBtn: (isActive: boolean) => ({
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    padding: '8px',
+    fontSize: '12px',
+    fontWeight: '700',
+    position: 'relative' as const,
+    zIndex: 10,
+    transition: 'color 0.3s',
+    color: isActive ? '#0f172a' : '#64748b',
+    cursor: 'pointer',
+    border: 'none',
+    background: 'transparent',
+  }),
+  contentArea: {
+    flex: 1,
+    overflow: 'hidden',
+    padding: '0 24px 24px 24px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+  },
+  mainPreview: {
+    flex: 1,
+    position: 'relative' as const,
+    backgroundColor: '#f8fafc',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    overflow: 'hidden',
+  },
+  topBar: {
+    height: '64px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '0 32px',
+    borderBottom: '1px solid #e2e8f0',
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    backdropFilter: 'blur(8px)',
+  },
+  topBarLabel: {
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#94a3b8',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.05em',
+  },
+  canvasContainer: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'auto',
+    padding: '40px',
+    position: 'relative' as const,
+    backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
+    backgroundSize: '24px 24px',
+  }
+};
+
 const App: React.FC = () => {
   const [mode, setMode] = useState<AppMode>('ADMIN');
   const [currentHtml, setCurrentHtml] = useState<string>(PRESETS['promo']);
@@ -15,91 +172,77 @@ const App: React.FC = () => {
   const canvasRef = useRef<FlyerCanvasRef>(null);
   const previewContainerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-fit preview
   useEffect(() => {
     const handleResize = () => {
       if (!previewContainerRef.current) return;
       const containerWidth = previewContainerRef.current.clientWidth;
       const containerHeight = previewContainerRef.current.clientHeight;
       
-      // Assume average flyer width is around 400px to 800px based on templates
-      // We need to parse the width from the HTML or assume a standard base width for scaling calculation.
-      // For simplicity, we assume the base rendered width is roughly 450px (including padding).
-      // A more robust way is measuring the actual rendered div, but we can start with a safe estimate.
       const targetWidth = 500; 
-      const padding = 60;
+      const padding = 80;
       
       const availableWidth = containerWidth - padding;
       const availableHeight = containerHeight - padding;
       
       const scaleX = availableWidth / targetWidth;
-      // Limit max scale to 1 (don't upscale pixelatedly)
       const newScale = Math.min(Math.max(scaleX, 0.4), 1.2); 
       
       setScale(newScale);
     };
 
     window.addEventListener('resize', handleResize);
-    // Call initially after a short delay to ensure render
     setTimeout(handleResize, 100);
     
     return () => window.removeEventListener('resize', handleResize);
-  }, [currentHtml]); // Re-calc when HTML changes as size might change
+  }, [currentHtml]);
 
   const handleUpdateVariable = (key: string, value: string) => {
     setVariables(prev => ({ ...prev, [key]: value }));
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden text-slate-800">
+    <div style={styles.appContainer}>
       
       {/* Sidebar */}
-      <aside className="w-96 bg-white border-r border-slate-200 flex flex-col shadow-xl z-20 flex-shrink-0">
+      <aside style={styles.sidebar}>
         
         {/* Header */}
-        <div className="h-16 border-b border-slate-100 flex items-center justify-between px-6 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-           <div className="flex items-center gap-2">
-             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-                <Zap className="w-5 h-5 fill-current" />
+        <div style={styles.header}>
+           <div style={styles.logoBox}>
+             <div style={styles.logoIcon}>
+                <Zap size={20} fill="currentColor" />
              </div>
-             <div>
-                <h1 className="text-sm font-extrabold text-slate-900 leading-tight">Flyer Pro</h1>
-                <p className="text-[10px] font-medium text-slate-400 tracking-wide">V2.4 GENERATOR</p>
+             <div style={styles.logoTextContainer}>
+                <h1 style={styles.logoTitle}>Flyer Pro</h1>
+                <p style={styles.logoSubtitle}>V2.4 GENERATOR</p>
              </div>
            </div>
-           <div className={`px-2 py-1 rounded-full text-[10px] font-bold tracking-wider ${mode === 'ADMIN' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+           <div style={styles.badge(mode === 'ADMIN')}>
               {mode}
            </div>
         </div>
 
         {/* Mode Switcher */}
-        <div className="p-4">
-            <div className="bg-slate-100 p-1 rounded-lg flex relative">
-                <div 
-                    className="absolute top-1 bottom-1 bg-white rounded-md shadow-sm transition-all duration-300 ease-in-out"
-                    style={{ 
-                        left: '4px', 
-                        width: 'calc(50% - 4px)',
-                        transform: mode === 'USER' ? 'translateX(100%)' : 'translateX(0)' 
-                    }}
-                />
+        <div style={styles.switcherContainer}>
+            <div style={styles.switcherBg}>
+                <div style={styles.switcherHighlight(mode === 'USER')} />
                 <button 
                     onClick={() => setMode('ADMIN')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold relative z-10 transition-colors ${mode === 'ADMIN' ? 'text-slate-900' : 'text-slate-500'}`}
+                    style={styles.switcherBtn(mode === 'ADMIN')}
                 >
-                    <Layers className="w-3.5 h-3.5" /> Template
+                    <Layers size={14} /> Template
                 </button>
                 <button 
                     onClick={() => setMode('USER')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold relative z-10 transition-colors ${mode === 'USER' ? 'text-slate-900' : 'text-slate-500'}`}
+                    style={styles.switcherBtn(mode === 'USER')}
                 >
-                    <User className="w-3.5 h-3.5" /> Customize
+                    <User size={14} /> Customize
                 </button>
             </div>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-hidden px-6 pb-6">
+        <div style={styles.contentArea}>
             {mode === 'ADMIN' ? (
                 <AdminPanel 
                     currentHtml={currentHtml} 
@@ -121,24 +264,20 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Preview Area */}
-      <main className="flex-1 relative bg-slate-100/50 flex flex-col overflow-hidden">
+      <main style={styles.mainPreview}>
         
         {/* Top Bar */}
-        <div className="h-16 flex items-center justify-between px-8 border-b border-slate-200 bg-white/50 backdrop-blur-sm">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Canvas Preview</span>
-            <div className="flex items-center gap-4">
-                <span className="text-xs text-slate-400">Scale: {Math.round(scale * 100)}%</span>
+        <div style={styles.topBar}>
+            <span style={styles.topBarLabel}>Canvas Preview</span>
+            <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+                <span style={{fontSize: '12px', color: '#94a3b8'}}>Scale: {Math.round(scale * 100)}%</span>
             </div>
         </div>
 
         {/* Canvas Container */}
         <div 
             ref={previewContainerRef}
-            className="flex-1 flex items-center justify-center overflow-auto p-10 relative"
-            style={{ 
-                backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', 
-                backgroundSize: '20px 20px' 
-            }}
+            style={styles.canvasContainer}
         >
             <FlyerCanvas 
                 ref={canvasRef}

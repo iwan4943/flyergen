@@ -12,6 +12,131 @@ interface UserPanelProps {
   onExportHtml: () => void;
 }
 
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    height: '100%',
+  },
+  headerBox: {
+    backgroundColor: '#f0f9ff',
+    border: '1px solid #e0f2fe',
+    borderRadius: '12px',
+    padding: '16px',
+    marginBottom: '24px',
+  },
+  headerTitle: {
+    color: '#0369a1',
+    fontWeight: '700',
+    fontSize: '14px',
+    marginBottom: '4px',
+    margin: 0,
+  },
+  headerDesc: {
+    color: '#0284c7',
+    opacity: 0.7,
+    fontSize: '12px',
+    margin: 0,
+  },
+  scrollArea: {
+    flex: 1,
+    overflowY: 'auto' as const,
+    paddingRight: '8px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '20px',
+  },
+  fieldGroup: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+  },
+  label: {
+    fontSize: '12px',
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    textTransform: 'capitalize' as const,
+  },
+  colorInputWrapper: {
+    display: 'flex',
+    gap: '12px',
+    alignItems: 'center',
+  },
+  colorPicker: {
+    height: '40px',
+    width: '56px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    border: 'none',
+    padding: 0,
+    backgroundColor: 'transparent',
+  },
+  textInput: {
+    flex: 1,
+    padding: '8px 12px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '12px',
+    outline: 'none',
+    width: '100%',
+  },
+  qrBox: {
+    backgroundColor: 'rgba(253, 242, 248, 0.5)',
+    padding: '16px',
+    borderRadius: '12px',
+    border: '1px solid #fce7f3',
+  },
+  qrLabel: {
+    color: '#be185d',
+  },
+  qrInput: {
+    borderColor: '#fbcfe8',
+    backgroundColor: 'white',
+  },
+  actions: {
+    marginTop: '24px',
+    paddingTop: '24px',
+    borderTop: '1px solid #f1f5f9',
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '12px',
+  },
+  btnSecondary: {
+    padding: '12px',
+    backgroundColor: 'white',
+    border: '1px solid #e2e8f0',
+    color: '#475569',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'background 0.2s',
+  },
+  btnPrimary: {
+    padding: '12px',
+    backgroundColor: '#4f46e5',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontSize: '14px',
+    fontWeight: '700',
+    boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)',
+    cursor: 'pointer',
+    transition: 'background 0.2s',
+  }
+};
+
 const UserPanel: React.FC<UserPanelProps> = ({ 
   html, 
   variables, 
@@ -25,7 +150,6 @@ const UserPanel: React.FC<UserPanelProps> = ({
   const [qrText, setQrText] = useState('');
   const [hasQr, setHasQr] = useState(false);
 
-  // Extract fields from HTML
   useEffect(() => {
     const regex = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
     const foundFields = new Set<string>();
@@ -44,7 +168,6 @@ const UserPanel: React.FC<UserPanelProps> = ({
     setHasQr(qrFound);
   }, [html]);
 
-  // Handle QR Generation
   useEffect(() => {
     if (!qrText) {
         if (hasQr) onUpdateVariable('QR_CODE', ''); 
@@ -67,58 +190,58 @@ const UserPanel: React.FC<UserPanelProps> = ({
         }
     };
     generate();
-  }, [qrText, themeColor, hasQr]); // Regenerate when text or theme changes
+  }, [qrText, themeColor, hasQr]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div style={styles.container}>
         
-      <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 mb-6">
-        <h4 className="text-sky-700 font-bold text-sm mb-1">🎨 Customize Design</h4>
-        <p className="text-sky-600/70 text-xs">Fill in the details below. The preview updates automatically.</p>
+      <div style={styles.headerBox}>
+        <h4 style={styles.headerTitle}>🎨 Customize Design</h4>
+        <p style={styles.headerDesc}>Fill in the details below. The preview updates automatically.</p>
       </div>
 
-      <div className="space-y-5 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+      <div style={styles.scrollArea} className="custom-scrollbar">
         {/* Theme Color */}
-        <div>
-            <label className="text-xs font-bold text-slate-700 mb-2 flex items-center gap-2">
-                <Palette className="w-3 h-3" /> Theme Color
+        <div style={styles.fieldGroup}>
+            <label style={styles.label}>
+                <Palette size={12} /> Theme Color
             </label>
-            <div className="flex gap-3 items-center">
+            <div style={styles.colorInputWrapper}>
                 <input 
                     type="color" 
                     value={themeColor}
                     onChange={(e) => onUpdateTheme(e.target.value)}
-                    className="h-10 w-14 rounded cursor-pointer border-0 p-0 bg-transparent"
+                    style={styles.colorPicker}
                 />
                 <input 
                     type="text" 
                     value={themeColor}
                     onChange={(e) => onUpdateTheme(e.target.value)}
-                    className="flex-1 py-2 px-3 border border-slate-200 rounded-lg text-xs font-mono uppercase focus:ring-2 focus:ring-indigo-500 outline-none"
+                    style={{...styles.textInput, fontFamily: 'monospace', textTransform: 'uppercase'}}
                 />
             </div>
         </div>
 
         {/* QR Code Special Field */}
         {hasQr && (
-            <div className="bg-pink-50/50 p-4 rounded-xl border border-pink-100">
-                <label className="text-xs font-bold text-pink-700 mb-2 flex items-center gap-2">
-                    <QrCode className="w-3 h-3" /> QR Code Destination
+            <div style={styles.qrBox}>
+                <label style={{...styles.label, ...styles.qrLabel}}>
+                    <QrCode size={12} /> QR Code Destination
                 </label>
                 <input 
                     type="text" 
                     value={qrText}
                     onChange={(e) => setQrText(e.target.value)}
                     placeholder="https://example.com"
-                    className="w-full py-2.5 px-3 border border-pink-200 rounded-lg text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none bg-white transition-all"
+                    style={{...styles.textInput, ...styles.qrInput}}
                 />
             </div>
         )}
 
         {/* Dynamic Fields */}
         {fields.map(field => (
-            <div key={field}>
-                <label className="text-xs font-bold text-slate-700 mb-2 block capitalize">
+            <div key={field} style={styles.fieldGroup}>
+                <label style={styles.label}>
                     {field.replace(/_/g, ' ')}
                 </label>
                 <input 
@@ -126,25 +249,29 @@ const UserPanel: React.FC<UserPanelProps> = ({
                     value={variables[field] || ''}
                     onChange={(e) => onUpdateVariable(field, e.target.value)}
                     placeholder={`Enter ${field.toLowerCase().replace(/_/g, ' ')}...`}
-                    className="w-full py-2.5 px-3 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                    style={styles.textInput}
                 />
             </div>
         ))}
       </div>
 
       {/* Actions */}
-      <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 gap-3">
+      <div style={styles.actions}>
          <button 
             onClick={onExportHtml}
-            className="col-span-1 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg flex items-center justify-center gap-2 text-sm font-semibold transition-all"
+            style={styles.btnSecondary}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'white'}
          >
-            <FileCode className="w-4 h-4" /> HTML
+            <FileCode size={16} /> HTML
          </button>
          <button 
             onClick={onExportImage}
-            className="col-span-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center justify-center gap-2 text-sm font-bold shadow-lg shadow-indigo-200 transition-all"
+            style={styles.btnPrimary}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#4338ca'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#4f46e5'}
          >
-            <Download className="w-4 h-4" /> Download PNG
+            <Download size={16} /> Download PNG
          </button>
       </div>
 
