@@ -229,12 +229,16 @@ const App: React.FC = () => {
                 <button 
                     onClick={() => setMode('ADMIN')}
                     style={styles.switcherBtn(mode === 'ADMIN')}
+                    onMouseEnter={(e) => mode !== 'ADMIN' && (e.currentTarget.style.color = '#334155')}
+                    onMouseLeave={(e) => mode !== 'ADMIN' && (e.currentTarget.style.color = '#64748b')}
                 >
                     <Layers size={14} /> Template
                 </button>
                 <button 
                     onClick={() => setMode('USER')}
                     style={styles.switcherBtn(mode === 'USER')}
+                    onMouseEnter={(e) => mode !== 'USER' && (e.currentTarget.style.color = '#334155')}
+                    onMouseLeave={(e) => mode !== 'USER' && (e.currentTarget.style.color = '#64748b')}
                 >
                     <User size={14} /> Customize
                 </button>

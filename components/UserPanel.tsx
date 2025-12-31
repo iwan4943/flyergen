@@ -82,6 +82,7 @@ const styles = {
     fontSize: '12px',
     outline: 'none',
     width: '100%',
+    transition: 'all 0.2s',
   },
   qrBox: {
     backgroundColor: 'rgba(253, 242, 248, 0.5)',
@@ -200,7 +201,7 @@ const UserPanel: React.FC<UserPanelProps> = ({
         <p style={styles.headerDesc}>Fill in the details below. The preview updates automatically.</p>
       </div>
 
-      <div style={styles.scrollArea} className="custom-scrollbar">
+      <div style={styles.scrollArea}>
         {/* Theme Color */}
         <div style={styles.fieldGroup}>
             <label style={styles.label}>
@@ -218,6 +219,8 @@ const UserPanel: React.FC<UserPanelProps> = ({
                     value={themeColor}
                     onChange={(e) => onUpdateTheme(e.target.value)}
                     style={{...styles.textInput, fontFamily: 'monospace', textTransform: 'uppercase'}}
+                    onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                 />
             </div>
         </div>
@@ -234,6 +237,8 @@ const UserPanel: React.FC<UserPanelProps> = ({
                     onChange={(e) => setQrText(e.target.value)}
                     placeholder="https://example.com"
                     style={{...styles.textInput, ...styles.qrInput}}
+                    onFocus={(e) => e.target.style.borderColor = '#db2777'}
+                    onBlur={(e) => e.target.style.borderColor = '#fbcfe8'}
                 />
             </div>
         )}
@@ -250,6 +255,8 @@ const UserPanel: React.FC<UserPanelProps> = ({
                     onChange={(e) => onUpdateVariable(field, e.target.value)}
                     placeholder={`Enter ${field.toLowerCase().replace(/_/g, ' ')}...`}
                     style={styles.textInput}
+                    onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                 />
             </div>
         ))}
